@@ -1,0 +1,254 @@
+<?php
+
+
+function tripal_ontologyPages_theme() {
+  return array(
+    'tripal_ontologyPages' => array(
+        'variables' => array('results' => null),
+        'template' => 'tripal_ontologyPages',
+     ),
+  );
+}
+
+
+function tripal_ontologyPages_menu() {
+    $items = array();
+
+  $items['ontology/%'] = array(
+    'title' => 'Ontology Pages',
+    'page callback' => 'tripal_ontologyPages_getInfo',
+    'page arguments' => array(1),
+    'access arguments' => array('access content'),
+    'access callback' => true,
+    'type' => MENU_CALLBACK,
+  );
+
+    return $items;
+}
+
+
+function tripal_ontologyPages_getInfo($onto_id) {
+  list($prefix,$accession) = explode("_", $onto_id);
+  $onto_term_info = array();
+  $map_url="https://www.ebi.ac.uk/ols/api/ontologies/$prefix/terms?iri=http://purl.obolibrary.org/obo/$onto_id";
+  $json = tripal_ontologyPages_getJSON($map_url);
+  if ($json == 0){
+    $onto_term_info['name']="Error Retrieving $onto_id"  ;
+    return theme('tripal_ontologyPages',array('results' => $onto_term_info));
+  }
+  
+  $name = tripal_ontologyPages_getName($json);
+  drupal_set_title($name);
+
+  $onto_term_info['all']=$json;
+  $onto_term_info['name']=$name;
+  $onto_term_info['iri']=tripal_ontologyPages_getIRI($json);
+  $onto_term_info['def']=tripal_ontologyPages_getDef($json);
+  $onto_term_info['url']= tripal_ontologyPages_getSelfLink($json);
+  $onto_term_info['url_id']= tripal_ontologyPages_getURL_id($json);
+  $onto_term_info['def_xref']= tripal_ontologyPages_getDef_xref($json);
+  $onto_term_info['dbxref']= tripal_ontologyPages_getDbxref($json);
+  $onto_term_info['syn']= tripal_ontologyPages_getSynonyms($json);
+  $onto_term_info['id']= tripal_ontologyPages_getId($json);
+  $onto_term_info['namespace']= tripal_ontologyPages_getNamespace($json);
+  $onto_term_info['prefix']= tripal_ontologyPages_get_prefix($json);
+  $onto_term_info['curator note']= tripal_ontologyPages_getCuratorNote($json);
+  $onto_term_info['homology note']= tripal_ontologyPages_getHomologyNote($json);
+  $onto_term_info['seeAlso']= tripal_ontologyPages_getSeeAlso($json);
+  $onto_term_info['depicted_by']= tripal_ontologyPages_getDepictedBy($json);
+  $onto_term_info['depiction']= tripal_ontologyPages_getDepiction($json);
+
+  $onto_term_info['relationships']= tripal_ontologyPages_getRelationships($json) ;
+  $onto_term_info['parents']= tripal_ontologyPages_get_is_a($onto_term_info['relationships']) ;
+  $onto_term_info['getName']= tripal_ontologyPages_getLabel($onto_term_info['url_id']) ;
+   return theme('tripal_ontologyPages',array('results' => $onto_term_info));
+}
+
+
+
+function tripal_ontologyPages_getName($json){
+   return $json['_embedded']['terms'][0]['label']; 
+}
+
+function tripal_ontologyPages_getDef($json){
+   return $json['_embedded']['terms'][0]['description'][0]; 
+   //return $json['_embedded']['terms'][0]['obo_definition_citation'][0]['definition']; 
+}
+
+function tripal_ontologyPages_getDbxref($json){
+   $dbxrefs=NULL;
+   if(array_key_exists('obo_xref', $json['_embedded']['terms'][0]) && !is_null($json['_embedded']['terms'][0]['obo_xref'])) {
+     foreach ($json['_embedded']['terms'][0]['obo_xref'] as $xref){ 
+       $database = $xref['database'];
+       $id = $xref['id'];
+       $url = $xref['url'];
+       if ($database == 'OCLC' and is_null($url)){
+         $url = 'http://www.worldcat.org/oclc/' . $id;
+       }
+       $dbxrefs["$database:$id"]['url'] = $url;
+     }
+   }
+   return $dbxrefs;
+}
+
+function tripal_ontologyPages_getIRI($json){
+   return $json['_embedded']['terms'][0]['iri']; 
+}
+
+function tripal_ontologyPages_getNamespace($json){
+   return $json['_embedded']['terms'][0]['annotation']['has_obo_namespace'][0]; 
+}
+
+function tripal_ontologyPages_getId($json){
+   return $json['_embedded']['terms'][0]['annotation']['id'][0]; 
+}
+function tripal_ontologyPages_getCuratorNote($json){
+   $annotationss=NULL;
+   $annotation = 'curator note';
+    if (array_key_exists($annotation,$json['_embedded']['terms'][0]['annotation'])){
+       foreach($json['_embedded']['terms'][0]['annotation'][$annotation] as $key => $value){
+                   $annotations[] = $value;
+    }
+  }
+  return $annotations;
+}
+function tripal_ontologyPages_getHomologyNote($json){
+   $annotationss=NULL;
+   $annotation = 'homology_notes';
+    if (array_key_exists($annotation,$json['_embedded']['terms'][0]['annotation'])){
+       foreach($json['_embedded']['terms'][0]['annotation'][$annotation] as $key => $value){
+                   $annotations[] = $value;
+    }
+  }
+  return $annotations;
+}
+function tripal_ontologyPages_getSeeAlso($json){
+   $annotationss=NULL;
+   $annotation = 'seeAlso';
+    if (array_key_exists($annotation,$json['_embedded']['terms'][0]['annotation'])){
+       foreach($json['_embedded']['terms'][0]['annotation'][$annotation] as $key => $value){
+                   $annotations[] = $value;
+    }
+  }
+  return $annotations;
+}
+
+function tripal_ontologyPages_getDepictedBy($json){
+   $annotationss=NULL;
+   $annotation = 'depicted_by';
+    if (array_key_exists($annotation,$json['_embedded']['terms'][0]['annotation'])){
+       foreach($json['_embedded']['terms'][0]['annotation'][$annotation] as $key => $value){
+                   $annotations[] = $value;
+    }
+  }
+  return $annotations;
+}
+function tripal_ontologyPages_getDepiction($json){
+   $annotationss=NULL;
+   $annotation = 'depiction';
+    if (array_key_exists($annotation,$json['_embedded']['terms'][0]['annotation'])){
+       foreach($json['_embedded']['terms'][0]['annotation'][$annotation] as $key => $value){
+                   $annotations[] = $value;
+    }
+  }
+  return $annotations;
+}
+
+function tripal_ontologyPages_getSynonyms($json){
+   $synonyms=NULL;
+   if (!is_null($json['_embedded']['terms'][0]['synonyms'])){
+     $synonyms=array_values($json['_embedded']['terms'][0]['synonyms']);
+     if (array_key_exists('hasRelatedSynonym',$json['_embedded']['terms'][0]['annotation'])){
+       foreach($json['_embedded']['terms'][0]['annotation']['hasRelatedSynonym'] as $key => $value){
+                   $synonyms[] = $value;
+      }
+      }
+   }
+   return $synonyms;
+}
+
+function tripal_ontologyPages_getDef_xref($json){
+   $def_xrefs=NULL;
+   if (array_key_exists('obo_definition_citation',$json['_embedded']['terms'][0]) and !is_null($json['_embedded']['terms'][0]['obo_definition_citation'])){
+   foreach ($json['_embedded']['terms'][0]['obo_definition_citation'][0]['oboXrefs'] as $refs){
+     $database = $refs['database'];
+     $id = $refs['id'];
+     $url = $refs['url'];
+     if ($database == 'OCLC' and is_null($url)){
+       $url = 'http://www.worldcat.org/oclc/' . $id;
+     }
+     if ($id == $url){
+         $parts = explode('/',$id);
+         $last = array_pop($parts);
+         $last = preg_replace("/\.md/", "", $last);
+         $def_xrefs[$last] = $url;
+     }else{
+       $def_xrefs["$database:$id"]['url'] = $url;
+     }
+   }
+   }
+   return $def_xrefs;
+}
+
+function tripal_ontologyPages_getSelfLink($json){
+   $ontology_name = $json['_embedded']['terms'][0]['ontology_name'];
+   $short_form = $json['_embedded']['terms'][0]['short_form'];
+   $url = "https://www.ebi.ac.uk/ols/ontologies/$ontology_name/terms?iri=http%3A%2F%2Fpurl.obolibrary.org%2Fobo%2F$short_form";
+   return $url;
+}
+
+function tripal_ontologyPages_getURL_id($json){
+   return $json['_embedded']['terms'][0]['short_form'];
+}
+
+function tripal_ontologyPages_getLabel($prefix,$url_id){
+ $term_json = tripal_ontologyPages_getJSON("https://www.ebi.ac.uk/ols/api/ontologies/$prefix/terms?iri=http://purl.obolibrary.org/obo/$url_id");
+ $label =  $term_json['_embedded']['terms'][0]['label'];
+ return $label;
+}
+
+function tripal_ontologyPages_getJSON($map_url){
+  if (($response_json_data = file_get_contents($map_url))===false){
+    return 0;
+  } else {
+   $response_json_data = file_get_contents($map_url);
+   $json = json_decode($response_json_data, true);
+   return $json;
+  }
+}
+
+function tripal_ontologyPages_get_LINKS($json){
+  return $json['_embedded']['terms'][0]['_links'];
+}
+function tripal_ontologyPages_get_graph($json){
+  return $json['_embedded']['terms'][0]['_links']['graph']['href'];
+}
+
+function tripal_ontologyPages_get_prefix($json){
+  return $json['_embedded']['terms'][0]['ontology_prefix'];
+}
+
+function tripal_ontologyPages_getRelationships($json){
+  $relationships=NULL;
+  $href = tripal_ontologyPages_get_graph($json);
+  $relationships_json = tripal_ontologyPages_getJSON($href);
+    if(array_key_exists('edges', $relationships_json) &&   !is_null($relationships_json['edges'])) {
+      foreach ($relationships_json['edges'] as $term){
+        $relation = $term['label'];
+        $iri = explode('/',$term['target']);
+        $short_form = array_pop($iri);
+        $prefix = tripal_ontologyPages_get_prefix($json);
+        $name = tripal_ontologyPages_getLabel($prefix,$short_form);
+        $relationships[$relation][$name]['url_id'] = $short_form;
+        $relationships[$relation][$name]['iri'] =  $term['target'];
+      }
+  }
+  return $relationships;
+}
+function tripal_ontologyPages_get_is_a($relationships){
+   $parents=NULL;
+   if (array_key_exists('is a', $relationships)){
+    $parents=$relationships['is a'];
+   }
+   return $parents;
+}
