@@ -219,7 +219,7 @@ function tripal_ontologyPages_getJSON($map_url){
     $response_json_data = file_get_contents($json_path, true);
     $json = json_decode($response_json_data, true);
     return $json;
-  }ielse{
+  }else{
     if (($response_json_data = file_get_contents($map_url))===false){
       return 0;
     } else {
