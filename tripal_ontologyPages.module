@@ -39,7 +39,6 @@ function tripal_ontologyPages_getInfo($onto_id) {
   
   $name = tripal_ontologyPages_getName($json);
   drupal_set_title($name);
-
   $onto_term_info['all']=$json;
   $onto_term_info['name']=$name;
   $onto_term_info['iri']=tripal_ontologyPages_getIRI($json);
@@ -208,12 +207,27 @@ function tripal_ontologyPages_getLabel($prefix,$url_id){
 }
 
 function tripal_ontologyPages_getJSON($map_url){
-  if (($response_json_data = file_get_contents($map_url))===false){
-    return 0;
-  } else {
-   $response_json_data = file_get_contents($map_url);
-   $json = json_decode($response_json_data, true);
-   return $json;
+  $matches = array();
+  preg_match('/ebi.ac.uk\/ols\/api\/ontologies\/(\S+).+(\1.+)$/i', $map_url, $matches);
+print_r($matches);
+  $prefix = $matches[1];
+  $id = $matches[2];
+  str_replace("/",".",$i);
+  $json_dir = '/var/www/html/pub/plana_json';
+  $json_path = $json_dir . '/' . $id;
+
+  if (file_exists($json_path)){
+    $response_json_data = file_get_contents($json_path, true);
+    $json = json_decode($response_json_data, true);
+    return $json;
+  }else{
+    if (($response_json_data = file_get_contents($map_url))===false){
+      return 0;
+    } else {
+     $response_json_data = file_get_contents($map_url);
+     $json = json_decode($response_json_data, true);
+     return $json;
+    }
   }
 }
 
