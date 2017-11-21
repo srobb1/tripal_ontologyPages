@@ -1,7 +1,6 @@
 <?php 
 
-dpm($results, 'results'); 
-
+//dpm($results, 'results'); 
 $name = $results['name'];
 if (strpos($name , "Error")  !== false){
 print "<br>";
@@ -18,6 +17,7 @@ $def_xrefs = $results['def_xref'];
 $dbxrefs = $results['dbxref'];
 $parents = $results['parents'];
 $relationships = $results['relationships'];
+$has_this_relation = $results['has_this_relation'];
 $curator_notes = $results['curator note'];
 $homology_notes = $results['homology note'];
 $seeAlsos = $results['seeAlso'];
@@ -32,7 +32,7 @@ if(!is_null($results['depiction'])){
     $depicted_bys[] = $value;
   }
 }
-dpm($depicted_bys,'db');
+//dpm($depicted_bys,'db');
 print "<br>";
 print "<h2>$def</h2>";
 print "<br>";
@@ -95,10 +95,10 @@ if (!is_null($parents) or !is_null($relationships)){
        $relation = preg_replace('/_/' , ' ', $relation);
        print "<li>$name \"$relation\"";
        print '<ul>';
-       foreach ($relation_array as $term => $term_array){
+       foreach ($relation_array as $relation_term => $term_array){
          //$iri = $term_array['iri'];
          $term_url_id = $term_array['url_id'];
-         print "<li><a href=\"/ontology/$term_url_id\">" . $term . "</a></li>";
+         print "<li><a href=\"/ontology/$term_url_id\">" . $relation_term . "</a></li>";
        }
        print '</ul></li>';
      }
@@ -106,6 +106,29 @@ if (!is_null($parents) or !is_null($relationships)){
   print "</ul></div>";
   print "<br>";
 }
+if ( !is_null($has_this_relation)){
+  print "<p>RELATED TO:</p>";
+  print '<div id="nested-list">';
+  if (!is_null($has_this_relation)){
+    ksort($has_this_relation);
+    foreach ($has_this_relation as $relation => $relation_array){
+       print '<ul>';
+       print "<li>". '"' . $relation . '"' . ' ' . $name; 
+       print '<ul>';
+       $relation = preg_replace('/_/' , ' ', $relation);
+       foreach ($relation_array as $has_relation_term => $term_array){
+         //$iri = $term_array['iri'];
+         $term_url_id = $term_array['url_id'];
+         print "<li><a href=\"/ontology/$term_url_id\">" . $has_relation_term . '</a> "'. $relation . '" ' . $name   . " </li>";
+       }
+       print '</ul></li>';
+     }
+  }
+  print "</ul></div>";
+  print "<br>";
+}
+
+
 
 if(!is_null($depicted_bys)){
   print "<p>DEPICTED BY:</p>";
@@ -117,10 +140,12 @@ if(!is_null($depicted_bys)){
 
 if(!is_null($seeAlsos)){
   print "<p> SEE ALSO:</p>";
-  print "<p> Check out more detailed information about $term </p>";
+  print "<p> Check out more detailed information about $name </p>";
   print "<ul>";
   foreach($seeAlsos as $key => $value){
-    print "<li><a href=\"$value\">$value</a></li>";
+    $matches = array();
+    preg_match("/(\S+) \[(.+)\]/", $value, $matches);
+    print "<li><a href=\"$matches[2]\">$value</a></li>";
   }
   print "</ul>";
   print "<br>";
