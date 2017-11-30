@@ -23,9 +23,26 @@ function tripal_ontologyPages_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['ontology-update-json/%'] = array(
+    'title' => 'Ontology Pages JSON Update',
+    'page callback' => 'tripal_ontologyPages_update_json',
+    'page arguments' => array(1),
+    'access arguments' => array('access content'),
+    'access callback' => true,
+    'type' => MENU_CALLBACK,
+  );
+
     return $items;
 }
 
+function tripal_ontologyPages_update_json($prefix){
+   $path = drupal_get_path('module', 'tripal_ontologyPages');
+   $output = shell_exec("sh $path/get_json.sh $prefix");
+   $onto_term_info = array();
+   $onto_term_info['name']=$output;
+//   print("output $output");
+   return theme('tripal_ontologyPages',array('results' => $onto_term_info));
+}
 
 function tripal_ontologyPages_getInfo($onto_id) {
   list($prefix,$accession) = explode("_", $onto_id);
@@ -211,15 +228,17 @@ function tripal_ontologyPages_getJSON($map_url){
   preg_match('/ebi.ac.uk\/ols\/api\/ontologies\/(\S+).+(\1.+)$/i', $map_url, $matches);
   $prefix = $matches[1];
   $id = $matches[2];
-  str_replace("/",".",$i);
+  $id = str_replace("/",".",$id);
+  //$json_dir = tripal_get_files_dir('tripal_ontologyPages');
   $json_dir = '/var/www/html/pub/plana_json';
   $json_path = $json_dir . '/' . $id;
-
   if (file_exists($json_path)){
+    print("found it: $json_path<br>");
     $response_json_data = file_get_contents($json_path, true);
     $json = json_decode($response_json_data, true);
     return $json;
   }else{
+    print("trying to retrieve from ebi: $id :: $json_path<br>");
     if (($response_json_data = file_get_contents($map_url))===false){
       return 0;
     } else {
@@ -276,4 +295,15 @@ function tripal_ontologyPages_get_is_a($relationships){
     $parents=$relationships['is a'];
    }
    return $parents;
+}
+
+/**
+ * Implements hook_cron()
+ *
+ * @ingroup tripal_example
+ */
+function tripal_ontologyPages_cron() {
+
+  // EXPLANATION: here we can add any code that needs to be executed when the
+  // Drupal cron is run.
 }

@@ -13,6 +13,8 @@
 /**
  * Implements hook_install().
  */
-function blast_ui_install() {
-   tripal_create_files_dir('tripal_ontology_json');
+function tripal_ontologyPages_install() {
+   tripal_create_files_dir('tripal_ontologyPages');
+   //$output = shell_exec('sh get_ontology_json.sh');
+   //print($output);
 }

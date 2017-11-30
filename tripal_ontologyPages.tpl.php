@@ -2,7 +2,7 @@
 
 //dpm($results, 'results'); 
 $name = $results['name'];
-if (strpos($name , "Error")  !== false){
+if (strpos($name , "Error")  !== false and strpos($name , "Message")  !== false){
 print "<br>";
 print "<h2>$name</h2>";
 print "<br>";
@@ -109,10 +109,10 @@ if (!is_null($parents) or !is_null($relationships)){
 if ( !is_null($has_this_relation)){
   print "<p>RELATED TO:</p>";
   print '<div id="nested-list">';
+  print '<ul>';
   if (!is_null($has_this_relation)){
     ksort($has_this_relation);
     foreach ($has_this_relation as $relation => $relation_array){
-       print '<ul>';
        print "<li>". '"' . $relation . '"' . ' ' . $name; 
        print '<ul>';
        $relation = preg_replace('/_/' , ' ', $relation);
