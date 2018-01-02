@@ -1,12 +1,19 @@
 <?php
 
-
-function tripal_ontologyPages_theme() {
+function tripal_ontologyPages_theme($existing, $type, $theme, $path) {
+//function tripal_ontologyPages_theme() {
   return array(
     'tripal_ontologyPages' => array(
         'variables' => array('results' => null),
         'template' => 'tripal_ontologyPages',
+        'path' => "$path/theme/templates",
      ),
+    // the help template
+    'tripal_ontologyPages_help' => array(
+      'template' => 'tripal_ontologyPages_help',
+      'variables' =>  array(NULL),
+      'path' => "$path/theme/templates",
+    ),
   );
 }
 
@@ -32,7 +39,32 @@ function tripal_ontologyPages_menu() {
     'type' => MENU_CALLBACK,
   );
 
+
+  $items['admin/tripal/extension/tripal_ontologyPages/help'] = array(
+    'title' => 'Help',
+    'description' => 'Basic Description of Tripal Library Module Functionality',
+    'page callback' => 'theme',
+    'page arguments' => array('tripal_ontologyPages_help'),
+    'access arguments' => array('administer tripal ontologyPages'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+  );
+
     return $items;
+}
+
+function tripal_ontologyPages_help ($path, $arg) {
+
+  // EXPLANATION: in the tripal_ontologyPages_menu() function above we created a menu
+  // item for the help documentation. The menu item specified a function that
+  // should be called when the menu item is clicked. This is that function. But,
+  // rather than place HTML code in this function we want to have our help
+  // documentation in a template file. We specified in the
+  // tripal_ontologyPages_theme() function that we have a template file so now we want
+  // to use get the contents of that template file and return it.
+  if ($path == 'admin/help#tripal_ontologyPages') {
+    return theme('tripal_ontologyPages_help', array());
+  }
 }
 
 function tripal_ontologyPages_update_json($prefix){
@@ -229,16 +261,16 @@ function tripal_ontologyPages_getJSON($map_url){
   $prefix = $matches[1];
   $id = $matches[2];
   $id = str_replace("/",".",$id);
-  //$json_dir = tripal_get_files_dir('tripal_ontologyPages');
-  $json_dir = '/var/www/html/pub/plana_json';
+  $json_dir = tripal_get_files_dir('tripal_ontologyPages');
+  //$json_dir = '/var/www/html/pub';
   $json_path = $json_dir . '/' . $id;
   if (file_exists($json_path)){
-    print("found it: $json_path<br>");
+    //print("found it: $json_path<br>");
     $response_json_data = file_get_contents($json_path, true);
     $json = json_decode($response_json_data, true);
     return $json;
   }else{
-    print("trying to retrieve from ebi: $id :: $json_path<br>");
+    //print("trying to retrieve from ebi: $id :: $json_path<br>");
     if (($response_json_data = file_get_contents($map_url))===false){
       return 0;
     } else {
