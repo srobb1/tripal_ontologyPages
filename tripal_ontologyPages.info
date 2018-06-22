@@ -1,7 +1,13 @@
 package = Tripal Extensions
-name = Tripal Ontology Pages 
+name = Tripal Ontology Pages
 description = Provides an api for creating download pages. Uses tripal Jobs to generate files and provides a progress bar to users.
 version = 7.x-0.x
 core = 7.x
 
 dependencies[] = tripal_core
+
+;
+; Style-sheets containing CSS that should always be available for the
+; module should be specified here.
+;
+stylesheets[all][] = theme/css/tripal_ontologyPages.css
