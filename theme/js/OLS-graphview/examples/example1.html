@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <link rel="stylesheet" href="../css/awesomplete.css" type="text/css" />
+  <link rel="stylesheet" href="../css/OLS-graphview.css" type="text/css" media="screen" />
+  <link rel="stylesheet" href="../css/vis.min.css" type="text/css" />
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+  <script src="../build/ols-graphview.js"></script>
+
+</head>
+<body>
+<div style="margin-bottom:30px">
+<h4>Demonstration of the Ontology visualisation: example 1 </h4>
+This is an example with a <strong>minimum set of options</strong>, therefore demonstrating the 'default options'. The visualisation connects to EBI's OLS service to fetch the data for the term 'aggregation of unicellular organisms' in the GO ontology.
+<br><br>Questions, issues, bug reports or general feedback? Please use <a href='https://github.com/LLTommy/OLS-graphview'>github</a>
+</div>
+<div id="ontology_vis">
+</div>
+
+
+<script>
+var tmpnetworkOptions={ webservice : {URL: "https://www.ebi.ac.uk/ols/api/ontologies/go/terms?iri=", OLSschema:true}}
+var term="http://purl.obolibrary.org/obo/GO_0005578"
+
+var app = require("ols-graphview");
+var instance = new app();
+
+instance.visstart("ontology_vis", term, tmpnetworkOptions,{})
+</script>
+
+
+</body>
+</html>
