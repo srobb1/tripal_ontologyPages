@@ -97,7 +97,7 @@ function tripal_ontologyPages_getInfo($onto_id) {
   $onto_term_info['def_xref']= tripal_ontologyPages_getDef_xref($json);
   $onto_term_info['dbxref']= tripal_ontologyPages_getDbxref($json);
   $onto_term_info['syn']= tripal_ontologyPages_getSynonyms($json);
-  $onto_term_info['id']= tripal_ontologyPages_getId($json);
+  $onto_term_info['id']= tripal_ontologyPages_getId($onto_term_info['url_id']);
   $onto_term_info['namespace']= tripal_ontologyPages_getNamespace($json);
   $onto_term_info['prefix']= tripal_ontologyPages_get_prefix($json);
   $onto_term_info['curator note']= tripal_ontologyPages_getCuratorNote($json);
@@ -147,8 +147,9 @@ function tripal_ontologyPages_getNamespace($json){
    return $json['_embedded']['terms'][0]['annotation']['has_obo_namespace'][0]; 
 }
 
-function tripal_ontologyPages_getId($json){
-   return $json['_embedded']['terms'][0]['annotation']['id'][0]; 
+function tripal_ontologyPages_getId($iri){
+   $id = preg_replace("/(_)/", ":",$iri);
+   return($id);
 }
 function tripal_ontologyPages_getCuratorNote($json){
    $annotationss=NULL;
