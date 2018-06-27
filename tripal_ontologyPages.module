@@ -106,7 +106,7 @@ function tripal_ontologyPages_getInfo($onto_id) {
   $onto_term_info['depicted_by']= tripal_ontologyPages_getDepictedBy($json);
   $onto_term_info['depiction']= tripal_ontologyPages_getDepiction($json);
 
-  list ( $onto_term_info['relationships'] , $onto_term_info['has_this_relation'])= tripal_ontologyPages_getRelationships($json) ;
+  list ( $onto_term_info['relationships'] , $onto_term_info['has_this_relation'], $onto_term_info['relationship_uris'])= tripal_ontologyPages_getRelationships($json) ;
   $onto_term_info['parents']= tripal_ontologyPages_get_is_a($onto_term_info['relationships']) ;
   $onto_term_info['getName']= tripal_ontologyPages_getLabel($onto_term_info['url_id']) ;
    return theme('tripal_ontologyPages',array('results' => $onto_term_info));
@@ -303,6 +303,7 @@ function tripal_ontologyPages_getRelationships($json){
         $relation = $term['label'];
         $iri = explode('/',$term['target']);
         $short_form = array_pop($iri);
+        $relationship_uris[$relation] = $term['uri'];
         $this_id = tripal_ontologyPages_getURL_id($json);
         if ($short_form !== $this_id){
           $prefix = tripal_ontologyPages_get_prefix($json);
@@ -320,7 +321,7 @@ function tripal_ontologyPages_getRelationships($json){
         }
       }
   }
-  return array ($relationships, $has_this_relation);
+  return array ($relationships, $has_this_relation, $relationship_uris);
 }
 function tripal_ontologyPages_get_is_a($relationships){
    $parents=NULL;
