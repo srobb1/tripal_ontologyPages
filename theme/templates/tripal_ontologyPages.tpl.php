@@ -228,7 +228,7 @@ if(!empty($description_extra) or !empty($figures) or  count($wish_extra) > 0 or 
 }else{
   print 'The information below is dynamically pulled from the OLS.';
 }
-print "</h3>
+print '</h3>
 <br><hr>
 ';
 
