@@ -148,6 +148,62 @@ foreach ($results1 AS $r1){
   );
 if(count($rows)>0){
 $wish_extra = theme_table($table);
+
+
+
+
+// the $rows array contains an array of rows where each row is an array
+// of values for each column of the table in that row.  Additional documentation
+// can be found here:
+// https://api.drupal.org/api/drupal/includes%21theme.inc/function/theme_table/7
+$rows = array();
+
+// header row
+$headers = array('Abbreviation or symbol','Definition');
+// Unique Name row
+$rows[] = array( "O" ,"oral hemisphere");
+$rows[] = array( "A" , "aboral hemisphere");
+$rows[] = array( "D","dorsal");
+$rows[] = array( "V","ventral");
+$rows[] = array( "L","lateral");
+$rows[] = array( "black arrowhead","embryonic pharynx");
+$rows[] = array( "red arrowhead","definitive pharynx");
+$rows[] = array( "black arrows","primitive gut");
+$rows[] = array( "yellow arrows","primitive ectoderm cells");
+$rows[] = array( "cyan arrows",	"brain");
+$rows[] = array( "cyan arrowheads","nerve cords");
+$rows[] = array( "blue arrowheads","eye progenitors (trail cells)");
+$rows[] = array( "purple arrowheads","eyes");
+$rows[] = array( "scale bar","100 µm");
+$table = array(
+  'header' => $headers,
+  'rows' => $rows,
+  'attributes' => array(
+    'id' => 'tripal_feature-table-legend',
+    'class' => 'tripal-data-table'
+  ),
+  'sticky' => FALSE,
+  'caption' => '',
+  'colgroups' => array(),
+  'empty' => '',
+);
+
+// once we have our table array structure defined, we call Drupal's theme_table()
+// function to generate the table.
+$collapsed_content = theme_table($table);
+//$collapsed_content = "test";
+
+$wish_extra .=  theme(
+  'ctools_collapsible',
+  array(
+    'handle' => 'Click to see image symbols and abbreviations',
+    'content' => $collapsed_content,
+    'collapsed' => TRUE
+  )
+);
+
+
+
 }
 //////////////
 
