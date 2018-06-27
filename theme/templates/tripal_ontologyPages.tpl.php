@@ -1,6 +1,6 @@
 <?php 
 require_once '/var/www/html/sites/all/themes/nucleus/simr_theme/tpl/simr.functions.php';
-
+//dpm($results);
 $name = $results['name'];
 if (strpos($name , "Error")  !== false and strpos($name , "Message")  !== false){
 print "<br>";
@@ -17,6 +17,7 @@ $def_xrefs = $results['def_xref'];
 $dbxrefs = $results['dbxref'];
 $parents = $results['parents'];
 $relationships = $results['relationships'];
+$relationship_uris = $results['relationship_uris'];
 $has_this_relation = $results['has_this_relation'];
 $curator_notes = $results['curator note'];
 $homology_notes = $results['homology note'];
@@ -166,10 +167,12 @@ print '<figure class="center wide">
 
 if(!empty($description_extra) or !empty($figures) or  count($wish_extra) > 0 or !empty($references_extra)){
 print '
+<h3>The <a href="https://planosphere.stowers.org/anatomyontology">Planarian Anatomoy (PLANA) Ontology</a> is a collection of terms curated from the literature to document the anatomical and staging terms used to describe the planarian <em>Schmidtea mediterranea</em></a>. All terms have been deposited into the <a href"http://obofoundry.org/">Open Biological and Biomedical Ontology (OBO) Foundry </a>and are browsable with the <a href="https://www.ebi.ac.uk/ols/index">EMBL-EBI Ontology Lookup Service (OLS)</a>. The information in this <a href="#overview">Overview Section</a> is dynamically pulled from the OLS. Additional experimental information can be found in the <a href="#rich">Additional Term Information Section.</a></h3>
+<br><hr>
 <ul>
 <p><a name="top"> </a></p>
-<h2><a href="#overview">&#9659; Ontology Term Overview</a></h2>';
-  print '<h2><a href="#rich">&#9659; Enriched Term Information</a></h2>';
+<h2><a href="#overview">&#9659; Planarian Anatomy Ontology Term Overview</a></h2>';
+  print '<h2><a href="#rich">&#9659; Additional Term Information</a></h2>';
 }
 
 
@@ -193,7 +196,7 @@ print '<h2><a href="#download">&nbsp;&nbsp;&#9659; Download Supplemental Table</
 print "<br><hr><br>";
 
 print '<a name="overview"></a>';
-print "<h2>Ontology Term Overview</h2>";
+print "<h2>Planarian Anatomy Ontology Term Overview</h2>";
 print "<br>";
 
 print "<h3>ID:</h3>";
@@ -201,11 +204,13 @@ print "<h3>&nbsp;&nbsp;<a href=\"$url\">$id</a></h3>";
 print "<br>";
 
 print "<h3>NAME:</h3>";
-print "<h3>&nbsp;&nbsp;<a href=\"$url\">$name</a></h3>";
+print "<h3>&nbsp;&nbsp;$name</h3>";
+//print "<h3>&nbsp;&nbsp;<a href=\"$url\">$name</a></h3>";
 print "<br>";
 
 print "<h3>DEFINITON:</h3>";
-print "<h3>&nbsp;&nbsp;<a href=\"$url\">$def</a></h3>";
+print "<h3>&nbsp;&nbsp;$def</h3>";
+//print "<h3>&nbsp;&nbsp;<a href=\"$url\">$def</a></h3>";
 print "<br>";
 
 
@@ -230,7 +235,29 @@ if(!is_null($def_xrefs)){
   print "<h3>&nbsp;&nbsp;$def_xrefs_str</h3>";
   print "<br>";
 }
+if(!is_null($dbxrefs)){
+  print "<h3>TERM CITATIONS:</h3>";
+  print "<ul>";
+  foreach($dbxrefs as $dbxref => $dbxref_array){
+ //   $dbxref_url = $dbxref_array['url'];
+  //  print "<li><a href=\"$dbxref_url\">$dbxref</a></li>";
 
+   if (is_array($dbxref_array) and array_key_exists("url",$dbxref_array)){
+      if (!is_null($dbxref_array['url'])){
+        $dbxref_url = $dbxref_array['url'];
+        print "<li><a href=\"$dbxref_url\">$dbxref</a></li>";
+      }else{
+        print "<li>$dbxref</li>";
+      }
+    }else{
+      $dbxref_url = $dbxref_array;
+      print "<li><a href=\"$dbxref_url\">$dbxref</a></li>";
+    }
+
+  }
+  print "</ul>";
+  print "<h3>&nbsp;&nbsp;$def_xrefs_str</h3>";
+}
 
 if (array_key_exists("syn",$results) and !is_null($syns)){
   $syns_str = implode(', ', $syns);
@@ -240,7 +267,7 @@ if (array_key_exists("syn",$results) and !is_null($syns)){
 }
 
 if (!is_null($parents) or !is_null($relationships)){
-  print "<h3>ABOUT:</h3>";
+  print "<h3>ABOUT THIS TERM:</h3>";
   print '<div id="nested-list">';
   print '<ul>';
   print "<li>". $name .' "is a"'; 
@@ -259,8 +286,9 @@ if (!is_null($parents) or !is_null($relationships)){
        if ($relation == 'is a'){
          continue;
        }
+       $relation_uri = "<a href=\"https://www.ebi.ac.uk/ols/ontologies/$prefix/properties?iri=$relationship_uris[$relation]\">$relation</a>";
        $relation = preg_replace('/_/' , ' ', $relation);
-       print "<li>$name \"$relation\"";
+       print "<li>$name \"$relation_uri\"";
        print '<ul>';
        foreach ($relation_array as $relation_term => $term_array){
          //$iri = $term_array['iri'];
@@ -274,24 +302,30 @@ if (!is_null($parents) or !is_null($relationships)){
   print "<br>";
 }
 if ( !is_null($has_this_relation)){
-  print "<h3>RELATED TO:</h3>";
-  print '<div id="nested-list">';
-  print '<ul>';
+//  print "<h3>OTHER TERMS THAT MENTION $name:</h3>";
+//  print '<div id="nested-list">';
+//  print '<ul>';
   if (!is_null($has_this_relation)){
     ksort($has_this_relation);
     foreach ($has_this_relation as $relation => $relation_array){
-       print "<li>". '"' . $relation . '"' . ' ' . $name; 
-       print '<ul>';
+//       print "<li>". '"' . $relation . '"' . ' ' . $name; 
+//       print '<ul>';
+       $relation_uri = "<a href=\"https://www.ebi.ac.uk/ols/ontologies/$prefix/properties?iri=$relationship_uris[$relation]\">$relation</a>";
        $relation = preg_replace('/_/' , ' ', $relation);
        foreach ($relation_array as $has_relation_term => $term_array){
          //$iri = $term_array['iri'];
          $term_url_id = $term_array['url_id'];
-         print "<li><a href=\"/ontology/$term_url_id\">" . $has_relation_term . '</a> "'. $relation . '" ' . $name   . " </li>";
+//         print "<li><a href=\"/ontology/$term_url_id\">" . $has_relation_term . '</a> "'. $relation . '" ' . $name   . " </li>";
+         if ($relation == 'is a'){
+           print "<h3><a href=\"/ontology/$term_url_id\">$has_relation_term</a> \"$relation\" $name</h3>";
+         }else{
+           print "<h3><a href=\"/ontology/$term_url_id\">$has_relation_term</a> \"$relation_uri\" $name</h3>";
+         }
        }
-       print '</ul></li>';
+//       print '</ul></li>';
      }
   }
-  print "</ul></div>";
+//  print "</ul></div>";
   print "<br>";
 }
 
@@ -339,30 +373,7 @@ if(!is_null($homology_notes)){
   print "<br>";
 }
 
-if(!is_null($dbxrefs)){
-  print "<h3>TERM CITATIONS:</h3>";
-  print "<ul>";
-  foreach($dbxrefs as $dbxref => $dbxref_array){
- //   $dbxref_url = $dbxref_array['url'];
-  //  print "<li><a href=\"$dbxref_url\">$dbxref</a></li>";
 
-   if (is_array($dbxref_array) and array_key_exists("url",$dbxref_array)){
-      if (!is_null($dbxref_array['url'])){
-        $dbxref_url = $dbxref_array['url'];
-        print "<li><a href=\"$dbxref_url\">$dbxref</a></li>";
-      }else{
-        print "<li>$dbxref</li>";
-      }
-    }else{
-      $dbxref_url = $dbxref_array;
-      print "<li><a href=\"$dbxref_url\">$dbxref</a></li>";
-    }
-
-  }
-  print "</ul>";
-  print "<h3>&nbsp;&nbsp;$def_xrefs_str</h3>";
-  print "<br>";
-}
 $ols_tree_linkout = "https://www.ebi.ac.uk/ols/ontologies/$prefix/terms?iri=http://purl.obolibrary.org/obo/$url_id";
 print "<h3>BROWSE ONTOLOGY TREE: (<a href=\"$ols_tree_linkout\">IN OLS</a>)</h3>";
 
@@ -444,7 +455,7 @@ print '<div id="more_info" style="display:table">';
 print '<p>&nbsp;</p><p><a href="#top">back to top</a></p><hr />';
 //print "<br><hr><br>";
 print '<a name="rich"></a>';
-print "<h2>Enriched Term Information</h2>";
+print "<h2>Additional Term Information</h2>";
 print "<br>";
 
 if(!empty($description_extra)){
