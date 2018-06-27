@@ -229,11 +229,11 @@ if(!empty($description_extra) or !empty($figures) or  count($wish_extra) > 0 or 
   print 'The information below is dynamically pulled from the OLS.';
 }
 print '</h3>
-<br><hr>
 ';
 
 if(!empty($description_extra) or !empty($figures) or  count($wish_extra) > 0 or !empty($references_extra)){
 print '
+<br><hr>
 <ul>
 <p><a name="top"> </a></p>
 <h2><a href="#overview">&#9659; Planarian Anatomy Ontology Term Overview</a></h2>';
