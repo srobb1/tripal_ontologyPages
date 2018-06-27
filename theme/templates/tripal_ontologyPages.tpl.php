@@ -220,11 +220,20 @@ print '<figure class="center wide">
 <hr />';
 }
 
+print '<h3>';
+print 'The <a href="https://planosphere.stowers.org/anatomyontology">Planarian Anatomoy (PLANA) Ontology</a> is a collection of terms curated from the literature to document the anatomical and staging terms used to describe the planarian <em>Schmidtea mediterranea</em></a>. All terms have been deposited into the <a href"http://obofoundry.org/">Open Biological and Biomedical Ontology (OBO) Foundry </a>and are browsable with the <a href="https://www.ebi.ac.uk/ols/index">EMBL-EBI Ontology Lookup Service (OLS)</a>. '; 
+
+if(!empty($description_extra) or !empty($figures) or  count($wish_extra) > 0 or !empty($references_extra)){
+  print 'The information in this <a href="#overview">Overview Section</a> is dynamically pulled from the OLS. Additional experimental information can be found in the <a href="#rich">Additional Term Information Section.</a>';
+}else{
+  print 'The information below is dynamically pulled from the OLS.';
+}
+print "</h3>
+<br><hr>
+';
 
 if(!empty($description_extra) or !empty($figures) or  count($wish_extra) > 0 or !empty($references_extra)){
 print '
-<h3>The <a href="https://planosphere.stowers.org/anatomyontology">Planarian Anatomoy (PLANA) Ontology</a> is a collection of terms curated from the literature to document the anatomical and staging terms used to describe the planarian <em>Schmidtea mediterranea</em></a>. All terms have been deposited into the <a href"http://obofoundry.org/">Open Biological and Biomedical Ontology (OBO) Foundry </a>and are browsable with the <a href="https://www.ebi.ac.uk/ols/index">EMBL-EBI Ontology Lookup Service (OLS)</a>. The information in this <a href="#overview">Overview Section</a> is dynamically pulled from the OLS. Additional experimental information can be found in the <a href="#rich">Additional Term Information Section.</a></h3>
-<br><hr>
 <ul>
 <p><a name="top"> </a></p>
 <h2><a href="#overview">&#9659; Planarian Anatomy Ontology Term Overview</a></h2>';
