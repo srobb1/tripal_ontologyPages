@@ -22,6 +22,7 @@ $has_this_relation = $results['has_this_relation'];
 $curator_notes = $results['curator note'];
 $homology_notes = $results['homology note'];
 $seeAlsos = $results['seeAlso'];
+$comments = $results['comment'];
 $depicted_bys = NULL;
 if (!is_null($results['depicted_by'])){
   foreach ($results['depicted_by'] as $key => $value){
@@ -208,7 +209,32 @@ $wish_extra .=  theme(
 //////////////
 
 
-
+print '<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>';
+print " 
+<script type=\"text/javascript\">
+$(document).ready(function() {
+// Tooltip only Text
+$('.relation_def').hover(function(){
+        // Hover over code
+        var title = $(this).attr('title');
+        $(this).data('tipText', title).removeAttr('title');
+        $('<p class=\"tooltip\"></p>')
+        .text(title)
+        .appendTo('body')
+        .fadeIn('slow');
+}, function() {
+        // Hover out code
+        $(this).attr('title', $(this).data('tipText'));
+        $('.tooltip').remove();
+}).mousemove(function(e) {
+        var mousex = e.pageX + 20; //Get X coordinates
+        var mousey = e.pageY + 10; //Get Y coordinates
+        $('.tooltip')
+        .css({ top: mousey, left: mousex })
+});
+});
+</script>
+";
 
 preg_match("/Stage \d+/", $name, $match_array);
 if(!empty($match_array)){
@@ -264,13 +290,10 @@ print '<a name="overview"></a>';
 print "<h2>Planarian Anatomy Ontology Term Overview</h2>";
 print "<br>";
 
-print "<h3>ID:</h3>";
-print "<h3>&nbsp;&nbsp;<a href=\"$url\">$id</a></h3>";
-print "<br>";
 
 print "<h3>NAME:</h3>";
-print "<h3>&nbsp;&nbsp;$name</h3>";
-//print "<h3>&nbsp;&nbsp;<a href=\"$url\">$name</a></h3>";
+//print "<h3>&nbsp;&nbsp;$name</h3>";
+print "<h3>&nbsp;&nbsp;<a href=\"$url\">$name</a></h3>";
 print "<br>";
 
 print "<h3>DEFINITON:</h3>";
@@ -324,6 +347,10 @@ if(!is_null($dbxrefs)){
   print "<h3>&nbsp;&nbsp;$def_xrefs_str</h3>";
 }
 
+print "<h3>TERM ID:</h3>";
+print "<h3>&nbsp;&nbsp;<a href=\"$url\">$id</a></h3>";
+print "<br>";
+
 if (array_key_exists("syn",$results) and !is_null($syns)){
   $syns_str = implode(', ', $syns);
   print "<h3>SYNONYMS:</h3>";
@@ -333,17 +360,21 @@ if (array_key_exists("syn",$results) and !is_null($syns)){
 
 if (!is_null($parents) or !is_null($relationships)){
   print "<h3>ABOUT THIS TERM:</h3>";
-  print '<div id="nested-list">';
-  print '<ul>';
-  print "<li>". $name .' "is a"'; 
+//  print '<div id="nested-list">';
+//  print '<ul>';
+//  print "<li>". $name .' "is a"'; 
   print '<ul>';
   if (!is_null($parents)){
+    $parents_list = array();
     ksort($parents);
     foreach ($parents as $parent => $parent_array){
       $parent_url_id = $parent_array['url_id'];
-      print "<li><a href=\"/ontology/$parent_url_id\">" . $parent . "</a></li>";
+      $parents_list[] = " <a href=\"/ontology/$parent_url_id\">" . $parent . "</a>";
+//      print "<li><h3>$name \"is a\" <a href=\"/ontology/$parent_url_id\">" . $parent . "</a></h3></li>";
     }
-    print "</ul></li>";
+   $parents_str = implode(', ', $parents_list);
+   $parents_to_print =    preg_replace("/(, )([^,]+)?$/", " and $2", $parents_str);
+    print "<h3> $name \"is a\" $parents_to_print<h3>";
   }
   if (!is_null($relationships)){
     ksort($relationships);
@@ -351,46 +382,60 @@ if (!is_null($parents) or !is_null($relationships)){
        if ($relation == 'is a'){
          continue;
        }
-       $relation_uri = "<a href=\"https://www.ebi.ac.uk/ols/ontologies/$prefix/properties?iri=$relationship_uris[$relation]\">$relation</a>";
+       $relation_def = exec("curl https://www.ebi.ac.uk/ols/api/ontologies/plana/properties?iri=$relationship_uris[$relation] | grep description | perl -p -e 's/.+\[ \"(.+)\" \].+/$1/'");
+       $relation_uri = "<a title=\"$relation_def\" class=\"relation_def\" href=\"https://www.ebi.ac.uk/ols/ontologies/$prefix/properties?iri=$relationship_uris[$relation]\">$relation</a>";
        $relation = preg_replace('/_/' , ' ', $relation);
-       print "<li>$name \"$relation_uri\"";
-       print '<ul>';
+       $relations = array();
        foreach ($relation_array as $relation_term => $term_array){
          //$iri = $term_array['iri'];
          $term_url_id = $term_array['url_id'];
-         print "<li><a href=\"/ontology/$term_url_id\">" . $relation_term . "</a></li>";
+//         print "<li><h3>$name  \"$relation_uri\" <a href=\"/ontology/$term_url_id\">" . $relation_term . "</a></h3></li>";
+         $relations[] = "<a href=\"/ontology/$term_url_id\">" . $relation_term . "</a>";
        }
-       print '</ul></li>';
+       $relations_str =  implode(', ', $relations);
+       $relations_to_print =  preg_replace("/(, )([^,]+)?$/", " and $2", $relations_str);
+       print "<h3>$name  \"$relation_uri\" $relations_to_print" ;
      }
   }
-  print "</ul></div>";
-  print "<br>";
+  print "</ul>";
 }
 if ( !is_null($has_this_relation)){
 //  print "<h3>OTHER TERMS THAT MENTION $name:</h3>";
 //  print '<div id="nested-list">';
-//  print '<ul>';
+  print '<ul>';
   if (!is_null($has_this_relation)){
     ksort($has_this_relation);
+    $parents_list = array();
+    $relations_list=array();
     foreach ($has_this_relation as $relation => $relation_array){
-//       print "<li>". '"' . $relation . '"' . ' ' . $name; 
-//       print '<ul>';
-       $relation_uri = "<a href=\"https://www.ebi.ac.uk/ols/ontologies/$prefix/properties?iri=$relationship_uris[$relation]\">$relation</a>";
+       $relation_def = exec("curl https://www.ebi.ac.uk/ols/api/ontologies/plana/properties?iri=$relationship_uris[$relation] | grep description | perl -p -e 's/.+\[ \"(.+)\" \].+/$1/'");
+       $relation_uri = "<a title=\"$relation_def\" class=\"relation_def\" href=\"https://www.ebi.ac.uk/ols/ontologies/$prefix/properties?iri=$relationship_uris[$relation]\">$relation</a>";
        $relation = preg_replace('/_/' , ' ', $relation);
        foreach ($relation_array as $has_relation_term => $term_array){
          //$iri = $term_array['iri'];
          $term_url_id = $term_array['url_id'];
-//         print "<li><a href=\"/ontology/$term_url_id\">" . $has_relation_term . '</a> "'. $relation . '" ' . $name   . " </li>";
          if ($relation == 'is a'){
-           print "<h3><a href=\"/ontology/$term_url_id\">$has_relation_term</a> \"$relation\" $name</h3>";
+//           print "<li><h3><a href=\"/ontology/$term_url_id\">$has_relation_term</a> \"$relation\" $name</h3></li>";
+             $parents_list[] = "<a href=\"/ontology/$term_url_id\">$has_relation_term</a>";
          }else{
-           print "<h3><a href=\"/ontology/$term_url_id\">$has_relation_term</a> \"$relation_uri\" $name</h3>";
+       //    print "<li><h3><a href=\"/ontology/$term_url_id\">$has_relation_term</a> \"$relation_uri\" $name</h3></li>";
+             $relations_list[] = "<a href=\"/ontology/$term_url_id\">$has_relation_term</a>";
          }
        }
+       if ($relation == 'is a'){
+         $parents_str =  implode(', ', $parents_list);
+         $parents_to_print =  preg_replace("/(, )([^,]+)?$/", " and $2",$parents_str);
+         print "<h3>$parents_to_print \"is a\" $name</h3>";
+       }else{
+         $relations_str =  implode(', ', $relations_list);
+         $relations_to_print =  preg_replace("/(, )([^,]+)?$/", " and $2", $relations_str);
+         print "<h3>$relations_to_print \"is a\" $name</h3>";
+       }
+        
 //       print '</ul></li>';
      }
   }
-//  print "</ul></div>";
+  print "</ul>";
   print "<br>";
 }
 
@@ -403,6 +448,16 @@ if(!is_null($depicted_bys)){
   }
   print "<br>";
 }
+
+
+if(!is_null($comments)){
+  print "<h3>COMMENTS:</h3>";
+  foreach($comments as $key => $value){
+    print "<h3>$value</h3>";
+  }
+  print "<br>";
+}
+
 //Only prints see alsos if it isnt on planosphere
 preg_match("/(planosphere)/", $seeAlsos, $other_seeAlsos);
 if(!is_null($seeAlsos) and count($other_seeAlsos) > 0){
@@ -440,8 +495,10 @@ if(!is_null($homology_notes)){
 
 
 $ols_tree_linkout = "https://www.ebi.ac.uk/ols/ontologies/$prefix/terms?iri=http://purl.obolibrary.org/obo/$url_id";
-print "<h3>BROWSE ONTOLOGY TREE: (<a href=\"$ols_tree_linkout\">IN OLS</a>)</h3>";
-
+print "<h3>BROWSE ONTOLOGY TREE (<a href=\"$ols_tree_linkout\">IN OLS</a>):</h3>";
+print "<h4>Click on the '-' and '+' to collapse and expand term 'is a' relationships.</h4>";
+print "<br>";
+print "<h3>Planarian Anatomy Ontology</h3>";
 
 $module_path = drupal_get_path('module','tripal_ontologyPages');
 print '
@@ -521,6 +578,8 @@ print '<p>&nbsp;</p><p><a href="#top">back to top</a></p><hr />';
 //print "<br><hr><br>";
 print '<a name="rich"></a>';
 print "<h2>Additional Term Information</h2>";
+print "<br>";
+print "<h3>All experimental data displayed here is from <a href=\"/manuscript\">Davies et. al., 2017</a>, Smed Embryogenesis Molecular Staging Resource</h3>";
 print "<br>";
 
 if(!empty($description_extra)){
