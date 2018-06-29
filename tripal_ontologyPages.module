@@ -103,6 +103,7 @@ function tripal_ontologyPages_getInfo($onto_id) {
   $onto_term_info['curator note']= tripal_ontologyPages_getCuratorNote($json);
   $onto_term_info['homology note']= tripal_ontologyPages_getHomologyNote($json);
   $onto_term_info['seeAlso']= tripal_ontologyPages_getSeeAlso($json);
+  $onto_term_info['comment']= tripal_ontologyPages_getComment($json);
   $onto_term_info['depicted_by']= tripal_ontologyPages_getDepictedBy($json);
   $onto_term_info['depiction']= tripal_ontologyPages_getDepiction($json);
 
@@ -174,6 +175,16 @@ function tripal_ontologyPages_getHomologyNote($json){
 function tripal_ontologyPages_getSeeAlso($json){
    $annotationss=NULL;
    $annotation = 'seeAlso';
+    if (array_key_exists($annotation,$json['_embedded']['terms'][0]['annotation'])){
+       foreach($json['_embedded']['terms'][0]['annotation'][$annotation] as $key => $value){
+                   $annotations[] = $value;
+    }
+  }
+  return $annotations;
+}
+function tripal_ontologyPages_getComment($json){
+   $annotationss=NULL;
+   $annotation = 'comment';
     if (array_key_exists($annotation,$json['_embedded']['terms'][0]['annotation'])){
        foreach($json['_embedded']['terms'][0]['annotation'][$annotation] as $key => $value){
                    $annotations[] = $value;
