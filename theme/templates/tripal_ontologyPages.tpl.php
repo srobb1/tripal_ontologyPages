@@ -246,13 +246,15 @@ print '<figure class="center wide">
 <hr />';
 }
 
-print '<h3>';
-print 'The <a href="https://planosphere.stowers.org/anatomyontology">Planarian Anatomoy (PLANA) Ontology</a> is a collection of terms curated from the literature to document the anatomical and staging terms used to describe the planarian <em>Schmidtea mediterranea</em></a>. All terms have been deposited into the <a href"http://obofoundry.org/">Open Biological and Biomedical Ontology (OBO) Foundry </a>and are browsable with the <a href="https://www.ebi.ac.uk/ols/index">EMBL-EBI Ontology Lookup Service (OLS)</a>. '; 
+
+print '<p><h3><strong>The Planarian Anatomoy Ontology (<a href="https://planosphere.stowers.org/anatomyontology">PLANA</a>) is a collection of terms curated from the literature and other organism anatomy ontologies to describe anatomical features, life cycle stages and developmental processes in the regenerative flatworm <em>Schmidtea mediterranea</em>. The latest version of the PLANA Ontology is available through the Open Biological and Biomedical Ontology Foundry (<a href="http://obofoundry.org/">OBO</a>) . PLANA Ontology terms are searchable at the EMBL-EBI Ontology Lookup Service <a href="https://www.ebi.ac.uk/ols/index">(OLS)</a> and the <a href="glossary">PLANA Ontology Terms Page</a>.</strong></h3></p> 
+';
+//print 'The <a href="https://planosphere.stowers.org/anatomyontology">Planarian Anatomoy (PLANA) Ontology</a> is a collection of terms curated from the literature to document the anatomical and staging terms used to describe the planarian <em>Schmidtea mediterranea</em></a>. All terms have been deposited into the <a href"http://obofoundry.org/">Open Biological and Biomedical Ontology (OBO) Foundry </a>and are browsable with the <a href="https://www.ebi.ac.uk/ols/index">EMBL-EBI Ontology Lookup Service (OLS)</a>. '; 
 
 if(!empty($description_extra) or !empty($figures) or  count($wish_extra) > 0 or !empty($references_extra)){
-  print 'The information in this <a href="#overview">Overview Section</a> is dynamically pulled from the OLS. Additional experimental information can be found in the <a href="#rich">Additional Term Information Section.</a>';
+  print '<p><h3>Below, the <a href="#overview">Overview Section</a> is populated with infomration from the OLS.</h3></p><p><h3>Additional experimental information related to PLANA Ontology terms can be found in the <a href="#rich">Additional Term Information Section.</a></h3></p>';
 }else{
-  print 'The information below is dynamically pulled from the OLS.';
+  print '<p><h3>The <a href="#overview">Overview Section</a> is populated with infomration from the OLS.</h3></p>';
 }
 print '</h3>
 ';
@@ -363,7 +365,8 @@ if (!is_null($parents) or !is_null($relationships)){
 //  print '<div id="nested-list">';
 //  print '<ul>';
 //  print "<li>". $name .' "is a"'; 
-  print '<ul>';
+//  print '<ul>';
+
   if (!is_null($parents)){
     $parents_list = array();
     ksort($parents);
@@ -374,7 +377,7 @@ if (!is_null($parents) or !is_null($relationships)){
     }
    $parents_str = implode(', ', $parents_list);
    $parents_to_print =    preg_replace("/(, )([^,]+)?$/", " and $2", $parents_str);
-    print "<h3> $name \"is a\" $parents_to_print<h3>";
+    print "<h3>&nbsp;&nbsp;$name \"is a\" $parents_to_print<h3>";
   }
   if (!is_null($relationships)){
     ksort($relationships);
@@ -394,15 +397,16 @@ if (!is_null($parents) or !is_null($relationships)){
        }
        $relations_str =  implode(', ', $relations);
        $relations_to_print =  preg_replace("/(, )([^,]+)?$/", " and $2", $relations_str);
-       print "<h3>$name  \"$relation_uri\" $relations_to_print" ;
+       print "<h3>&nbsp;&nbsp;$name  \"$relation_uri\" $relations_to_print</h3>" ;
      }
   }
-  print "</ul>";
+//  print "</ul>";
+print "<br>";
 }
 if ( !is_null($has_this_relation)){
 //  print "<h3>OTHER TERMS THAT MENTION $name:</h3>";
 //  print '<div id="nested-list">';
-  print '<ul>';
+  //print '<ul>';
   if (!is_null($has_this_relation)){
     ksort($has_this_relation);
     $parents_list = array();
@@ -425,17 +429,17 @@ if ( !is_null($has_this_relation)){
        if ($relation == 'is a'){
          $parents_str =  implode(', ', $parents_list);
          $parents_to_print =  preg_replace("/(, )([^,]+)?$/", " and $2",$parents_str);
-         print "<h3>$parents_to_print \"is a\" $name</h3>";
+         print "<h3>&nbsp;&nbsp;$parents_to_print \"is a\" $name</h3>";
        }else{
          $relations_str =  implode(', ', $relations_list);
          $relations_to_print =  preg_replace("/(, )([^,]+)?$/", " and $2", $relations_str);
-         print "<h3>$relations_to_print \"is a\" $name</h3>";
+         print "<h3>&nbsp;&nbsp;$relations_to_print \"is a\" $name</h3>";
        }
         
 //       print '</ul></li>';
      }
   }
-  print "</ul>";
+//  print "</ul>";
   print "<br>";
 }
 
@@ -572,7 +576,7 @@ instance2.visstart("ontology_vis", term, tmpnetworkOptions,{})
 
 
 //print '<div style="display:table"><p>&nbsp;</p><p><a href="#top">back to top</a></p><hr /></div>';
-
+if(!empty($description_extra) or !empty($figures) or  count($wish_extra) > 0 or !empty($references_extra)){
 print '<div id="more_info" style="display:table">';
 print '<p>&nbsp;</p><p><a href="#top">back to top</a></p><hr />';
 //print "<br><hr><br>";
@@ -675,5 +679,6 @@ print '<p><a name="download"></a></p>
 }
 
 print '</div>';
+}
 }
 ?>

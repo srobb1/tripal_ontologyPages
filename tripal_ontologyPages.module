@@ -133,6 +133,8 @@ function tripal_ontologyPages_getDbxref($json){
        $url = $xref['url'];
        if ($database == 'OCLC' and is_null($url)){
          $url = 'http://www.worldcat.org/oclc/' . $id;
+       }elseif(is_null($url)){
+         $url = "https://www.ebi.ac.uk/ols/ontologies/$database/terms?iri=http://purl.obolibrary.org/obo/" . $database .'_' .$id;
        }
        $dbxrefs["$database:$id"]['url'] = $url;
      }
