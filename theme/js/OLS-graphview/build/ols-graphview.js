@@ -40629,7 +40629,7 @@ Hammer.defaults = {
          * @type {String}
          * @default 'none'
          */
-        userSelect: 'none',
+        userSelect: 'all',
 
         /**
          * Disable the Windows Phone grippers when pressing an element.
